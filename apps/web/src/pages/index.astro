@@ -1,0 +1,36 @@
+---
+import '../styles/global.css';
+---
+
+<html lang="ja">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+		<meta name="generator" content={Astro.generator} />
+		<title>Hello AR</title>
+	</head>
+	<body>
+		<main class="shell">
+			<section class="stage" aria-label="AR preview">
+				<div id="scene-root" class="scene-root"></div>
+				<div class="hud" aria-live="polite">
+					<p class="kicker">WebXR placement test</p>
+					<h1>Hello AR</h1>
+					<p id="status" class="status">Checking AR support...</p>
+					<div class="controls">
+						<button id="start-ar" type="button" disabled>Start AR</button>
+						<div class="measure">
+							<span>Object</span>
+							<strong>0.3m x 0.3m x 0.3m</strong>
+						</div>
+					</div>
+				</div>
+			</section>
+		</main>
+		<script>
+			import '../scripts/ar';
+		</script>
+	</body>
+</html>
