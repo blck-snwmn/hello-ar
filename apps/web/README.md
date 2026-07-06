@@ -2,12 +2,29 @@
 
 Astro static site for the WebXR AR placement sample.
 
-## Commands
+## Develop
 
 ```sh
 pnpm dev
+```
+
+## Build
+
+```sh
 pnpm build
+```
+
+## Deploy
+
+```sh
 pnpm run deploy
+```
+
+`deploy` builds the site before running Wrangler.
+
+## Cloudflare Types
+
+```sh
 pnpm run cf-typegen
 ```
 
