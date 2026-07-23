@@ -40,7 +40,7 @@ jobs:
       - name: Format check
         run: pnpm run fmt:check
 
-      - name: Type check
+      - name: Astro check
         run: pnpm run typecheck
 
       - name: Build

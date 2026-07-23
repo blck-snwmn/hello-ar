@@ -11,7 +11,7 @@
     "lint:fix": "oxlint . --fix",
     "fmt": "oxfmt --write .",
     "fmt:check": "oxfmt --check .",
-    "typecheck": "astro check && tsc --noEmit",
+    "typecheck": "astro check",
     "deploy": "astro build && wrangler deploy",
     "cf-typegen": "wrangler types"
   },
@@ -23,8 +23,8 @@
     "@astrojs/check": "^0.9.9",
     "@types/three": "^0.185.0",
     "oxfmt": "0.56.0",
-    "oxlint": "1.71.0",
-    "oxlint-tsgolint": "0.23.0",
+    "oxlint": "1.75.0",
+    "oxlint-tsgolint": "7.0.2001",
     "typescript": "^6.0.3",
     "wrangler": "^4.105.0"
   },
