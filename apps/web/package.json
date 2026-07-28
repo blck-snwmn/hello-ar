@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@sparkjsdev/spark": "2.1.0",
-    "astro": "^7.0.3",
+    "astro": "^7.1.1",
     "three": "^0.185.0"
   },
   "devDependencies": {
