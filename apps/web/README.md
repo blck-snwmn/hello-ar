@@ -1,6 +1,6 @@
 # hello-ar-web
 
-Astro static site for the WebXR AR placement sample.
+Astro static site for the WebXR and Spark.js AR placement sample.
 
 ## Develop
 
@@ -35,6 +35,10 @@ Local development is useful for layout and fallback checks. Android AR testing s
 - Starts an `immersive-ar` WebXR session when supported.
 - Uses hit-test to find a floor or table surface.
 - Shows a reticle on the detected surface.
-- Places a small test box: `0.3m x 0.3m x 0.3m`.
+- Renders a Gaussian splat with Spark.js in the Three.js scene.
+- Places the sample splat on the detected surface. Repeated taps move the same sample.
+
+The current proof of concept generates a small splat sphere procedurally. It does
+not depend on an externally hosted visual asset.
 
 The AR code lives in `src/scripts/ar.ts`. It is intentionally kept inside the web app instead of a shared package.

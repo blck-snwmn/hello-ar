@@ -1,16 +1,17 @@
 import {
   BoxGeometry,
   GridHelper,
+  Group,
   HemisphereLight,
   Mesh,
   MeshBasicMaterial,
-  MeshStandardMaterial,
   PerspectiveCamera,
   RingGeometry,
   Scene,
   Vector3,
   WebGLRenderer,
 } from "three";
+import { constructSpherePoints, SparkRenderer, SplatMesh } from "@sparkjsdev/spark";
 
 type XRFrameWithHitTest = XRFrame & {
   getHitTestResults(source: XRHitTestSource): XRHitTestResult[];
@@ -28,11 +29,7 @@ type XRSessionWithHitTest = XRSession & {
   requestHitTestSource(options: { space: XRReferenceSpace }): Promise<XRHitTestSource>;
 };
 
-const furnitureSize = {
-  width: 0.3,
-  depth: 0.3,
-  height: 0.3,
-};
+const sampleRadius = 0.18;
 
 const trackingSpaceTypes: XRReferenceSpaceType[] = ["local-floor", "local", "unbounded"];
 
@@ -59,6 +56,9 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.xr.enabled = true;
 sceneRoot.appendChild(renderer.domElement);
 
+const spark = new SparkRenderer({ renderer });
+scene.add(spark);
+
 const light = new HemisphereLight(0xffffff, 0x586058, 2.6);
 scene.add(light);
 
@@ -66,9 +66,20 @@ const grid = new GridHelper(3, 12, 0x8ff0b8, 0x3f4942);
 grid.position.y = -0.01;
 scene.add(grid);
 
-const previewBox = createFurnitureMesh(0.36);
-previewBox.position.set(0, furnitureSize.height / 2, 0);
-scene.add(previewBox);
+const splatAnchor = new Group();
+const sampleSplat = new SplatMesh({
+  constructSplats: (splats) =>
+    constructSpherePoints({
+      splats,
+      radius: sampleRadius,
+      maxDepth: 4,
+      pointRadius: 0.018,
+      pointThickness: 0.006,
+    }),
+});
+splatAnchor.add(sampleSplat);
+splatAnchor.position.y = sampleRadius;
+scene.add(splatAnchor);
 
 const reticle = new Mesh(
   new RingGeometry(0.12, 0.15, 48).rotateX(-Math.PI / 2),
@@ -92,18 +103,6 @@ let placedCount = 0;
 let hasSurface = false;
 const cameraPosition = new Vector3();
 const cameraDirection = new Vector3();
-
-function createFurnitureMesh(opacity = 0.86) {
-  const geometry = new BoxGeometry(furnitureSize.width, furnitureSize.height, furnitureSize.depth);
-  const material = new MeshStandardMaterial({
-    color: 0xd8c7a3,
-    metalness: 0.08,
-    roughness: 0.72,
-    transparent: opacity < 1,
-    opacity,
-  });
-  return new Mesh(geometry, material);
-}
 
 function setStatus(message: string) {
   statusText.textContent = message;
@@ -140,7 +139,7 @@ async function startArSession() {
   document.body.classList.add("is-ar-active");
   startButton.disabled = true;
   grid.visible = false;
-  previewBox.visible = false;
+  splatAnchor.visible = false;
   hasSurface = false;
   setStatus("Scanning for a surface. Move the phone slowly across the floor.");
 
@@ -154,9 +153,11 @@ async function startArSession() {
     scanMarker.visible = false;
     hasSurface = false;
     grid.visible = true;
-    previewBox.visible = true;
+    splatAnchor.visible = true;
     startButton.disabled = false;
-    setStatus(`Session ended. Placed ${placedCount} object${placedCount === 1 ? "" : "s"}.`);
+    setStatus(
+      `Session ended. Placed the sample ${placedCount} time${placedCount === 1 ? "" : "s"}.`,
+    );
   });
 
   session.addEventListener("select", () => {
@@ -165,13 +166,11 @@ async function startArSession() {
       return;
     }
 
-    const mesh = createFurnitureMesh();
-    mesh.matrix.copy(reticle.matrix);
-    mesh.matrix.decompose(mesh.position, mesh.quaternion, mesh.scale);
-    mesh.position.y += furnitureSize.height / 2;
-    scene.add(mesh);
+    reticle.matrix.decompose(splatAnchor.position, splatAnchor.quaternion, splatAnchor.scale);
+    splatAnchor.position.y += sampleRadius;
+    splatAnchor.visible = true;
     placedCount += 1;
-    setStatus(`Placed ${placedCount} object${placedCount === 1 ? "" : "s"}.`);
+    setStatus(`Placed the Gaussian splat ${placedCount} time${placedCount === 1 ? "" : "s"}.`);
   });
 
   await renderer.xr.setSession(session);
@@ -216,7 +215,7 @@ function onAnimationFrame(_time: DOMHighResTimeStamp, frame?: XRFrame) {
         scanMarker.visible = false;
         if (!hasSurface) {
           hasSurface = true;
-          setStatus("Surface found. Tap the green ring to place the box.");
+          setStatus("Surface found. Tap the green ring to place the splat.");
         }
       }
     }
@@ -257,4 +256,9 @@ renderer.setAnimationLoop(onAnimationFrame);
 checkSupport().catch((error: unknown) => {
   const message = error instanceof Error ? error.message : String(error);
   setStatus(`Could not check AR support: ${message}`);
+});
+
+sampleSplat.initialized.catch((error: unknown) => {
+  const message = error instanceof Error ? error.message : String(error);
+  setStatus(`Could not load the sample Gaussian splat: ${message}`);
 });

@@ -16,6 +16,7 @@
     "cf-typegen": "wrangler types"
   },
   "dependencies": {
+    "@sparkjsdev/spark": "2.1.0",
     "astro": "^7.0.3",
     "three": "^0.185.0"
   },
